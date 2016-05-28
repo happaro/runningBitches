@@ -4,13 +4,18 @@ using UnityEngine.SceneManagement;
 
 public class PlayerController : MonoBehaviour 
 {
+	public enum ButtonNum {Button0, Button1, Button2, Button3, Button4, Button5, Button6, Button7, Button8}
+
 	public float speed = 10;
 	public float rotateSpeed = 5;
 	public float jumpForce = 200;
 	public int currentPlayerNum = 1;
-
-	private float h = 0, v = 0;
 	private bool grounded;
+
+	bool GetCurrentJoyButton(ButtonNum buttonNum)
+	{
+		return Input.GetButtonDown(string.Format("joy{0}_{1}", currentPlayerNum, buttonNum.ToString().ToLower()));
+	}
 
 	void OnCollisionEnter(Collision coll)
 	{
@@ -21,30 +26,23 @@ public class PlayerController : MonoBehaviour
 	{
 		grounded = coll.gameObject.tag == "Ground" ? false : grounded;
 	}
-
-	void Start()
-	{
-		foreach (var joy in Input.GetJoystickNames())
-			Debug.LogWarning(joy);
-		
-	}
 		
 	void Update()
 	{	
-		Movement();
+		Movement(grounded);
 		Rotating();
-		if (Input.GetButtonDown (string.Format("joy{0}_button0", currentPlayerNum)) && grounded)
+		if (GetCurrentJoyButton(ButtonNum.Button0) && grounded)
 			Jump();
-		if (Input.GetButtonDown ("best"))
+		if (GetCurrentJoyButton(ButtonNum.Button6))
 			SceneManager.LoadScene(0);
 	}
 
-	void Movement()
+	void Movement(bool grounded)
 	{
 		Vector3 movement = this.transform.rotation * Vector3.forward;
-		transform.GetComponent<Rigidbody>().MovePosition(this.transform.position + movement / (100f / speed));
+		var v = movement / (100f / (grounded ? speed : speed / 2));
+		transform.GetComponent<Rigidbody>().MovePosition(this.transform.position + v);
 	}
-
 	void Jump()
 	{
 		transform.GetComponent<Rigidbody>().AddForce(0, jumpForce, 0);
