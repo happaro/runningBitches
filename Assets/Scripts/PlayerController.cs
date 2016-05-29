@@ -32,7 +32,7 @@ public class PlayerController : MonoBehaviour
 	{	
 		Movement(grounded);
 		Rotating();
-		if (GetCurrentJoyButton(ButtonNum.Button0) && grounded)
+		if (GetCurrentJoyButton(ButtonNum.Button2) && grounded)
 			Jump();
 		if (GetCurrentJoyButton(ButtonNum.Button6))
 			SceneManager.LoadScene(0);

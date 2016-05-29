@@ -8,7 +8,8 @@ public class PlayerManager : MonoBehaviour
 	public static PlayerManager Instance;
 	public List<PlayerSettings> playersSettings;
 	public GameObject[] prefabs;
-
+	private bool[] axisLock = {false, false};
+		
 	private int currentLevelNum = 0;
 
 	private bool choosePlayerScene;
@@ -41,10 +42,10 @@ public class PlayerManager : MonoBehaviour
 		{
 			for (int i = 1; i <= 2; i++)
 			{
-				//triangle
-				if (GetCurrentJoyButton(ButtonNum.Button0, i))
+				//X
+				if (GetCurrentJoyButton(ButtonNum.Button2, i))
 					AddPlayer(i);
-				//triangle
+				//START
 				if (GetCurrentJoyButton(ButtonNum.Button9, i))
 					SceneManager.LoadScene("Gameplay");
 				//L1
@@ -54,8 +55,15 @@ public class PlayerManager : MonoBehaviour
 				if (GetCurrentJoyButton(ButtonNum.Button5, i))
 					ChangeColor(i, 1);
 				//L2
-				if (GetCurrentJoyButton(ButtonNum.Button6, i))
-					ChangeSkin(i, 1);
+				//if (GetCurrentJoyButton(ButtonNum.Button6, i))
+				//	ChangeSkin(i, 1);
+
+				if (!axisLock[i - 1] && GetCurrentJoyAxis("horizontal", i) != 0)
+				{
+					ChangeSkin(i, GetCurrentJoyAxis("horizontal", i));
+					axisLock[i - 1] = true;
+				}
+				ResetAxisLock("horizontal", i);
 			}
 		}
 		else
@@ -66,14 +74,20 @@ public class PlayerManager : MonoBehaviour
 		}
 	}
 
-	private bool GetCurrentJoyButton(ButtonNum buttonNum, int currentPlayerNum)
+	private bool GetCurrentJoyButton(ButtonNum buttonNum, int joystickNum)
 	{
-		return Input.GetButtonDown(string.Format("joy{0}_{1}", currentPlayerNum, buttonNum.ToString().ToLower()));
+		return Input.GetButtonDown(string.Format("joy{0}_{1}", joystickNum, buttonNum.ToString().ToLower()));
 	}
 
-	private float GetCurrentJoyAxis(string axisName, int currentPlayerNum)
+	private int GetCurrentJoyAxis(string axisName, int joystickNum)
 	{
-		return Input.GetAxisRaw(string.Format("joy{0}_{1}", currentPlayerNum, axisName));
+		return Mathf.RoundToInt(Input.GetAxis(string.Format("joy{0}_{1}", joystickNum, axisName)));
+	}
+
+	private void ResetAxisLock(string axisName, int joystickNum)
+	{
+		if (axisLock[joystickNum - 1] && Mathf.Abs(Input.GetAxis(string.Format("joy{0}_{1}", joystickNum, axisName))) < 0.1f)
+			axisLock[joystickNum - 1] = false;
 	}
 
 	public void AddPlayer(int joyNum)
