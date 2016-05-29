@@ -1,6 +1,7 @@
 ﻿using UnityEngine;
 using System.Collections;
 using System.Collections.Generic;
+using UnityEngine.SceneManagement;
 
 public class PlayerManager : MonoBehaviour 
 {
@@ -8,31 +9,60 @@ public class PlayerManager : MonoBehaviour
 	public List<PlayerSettings> playersSettings;
 	public GameObject[] prefabs;
 
+	private int currentLevelNum = 0;
+
 	private bool choosePlayerScene;
 
-	void Start () 
+	void Awake () 
 	{
 		playersSettings = new List<PlayerSettings>();
 		if (PlayerManager.Instance == null)
+		{
 			Instance = this;
+			DontDestroyOnLoad(this.gameObject);
+		}
+		else
+		{
+			Destroy(this.gameObject);
+		}
+		
+	}
+
+	void OnLevelWasLoaded(int levelNum)
+	{
+		currentLevelNum = levelNum;
+		if (levelNum == 0)
+			playersSettings.Clear();
 	}
 
 	void Update()
 	{
-		for (int i = 1; i <= 2; i++)
+		if (currentLevelNum == 0)
 		{
-			//triangle
-			if (GetCurrentJoyButton(ButtonNum.Button0, i))
-				AddPlayer(i);
-			//L1
-			if (GetCurrentJoyButton(ButtonNum.Button4, i))
-				ChangeColor(i, -1);
-			//R1
-			if (GetCurrentJoyButton(ButtonNum.Button5, i))
-				ChangeColor(i, 1);
-			//L2
-			if (GetCurrentJoyButton(ButtonNum.Button6, i))
-				ChangeSkin(i, 1);
+			for (int i = 1; i <= 2; i++)
+			{
+				//triangle
+				if (GetCurrentJoyButton(ButtonNum.Button0, i))
+					AddPlayer(i);
+				//triangle
+				if (GetCurrentJoyButton(ButtonNum.Button9, i))
+					SceneManager.LoadScene("Gameplay");
+				//L1
+				if (GetCurrentJoyButton(ButtonNum.Button4, i))
+					ChangeColor(i, -1);
+				//R1
+				if (GetCurrentJoyButton(ButtonNum.Button5, i))
+					ChangeColor(i, 1);
+				//L2
+				if (GetCurrentJoyButton(ButtonNum.Button6, i))
+					ChangeSkin(i, 1);
+			}
+		}
+		else
+		{
+			for (int i = 1; i <= 2; i++)
+				if (GetCurrentJoyButton(ButtonNum.Button9, i))
+					SceneManager.LoadScene(0);
 		}
 	}
 
@@ -87,7 +117,7 @@ public class PlayerSettings
 	{
 		joystickNumber = joyNum;
 		playerNumber = playerNum;
-		characterNumber = 1;
+		characterNumber = 0;
 		colorNumber = 0;
 	}
 

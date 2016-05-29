@@ -2,7 +2,7 @@
 using System.Collections;
 using UnityEngine.SceneManagement;
 
-public enum ButtonNum {Button0 = 0, Button1, Button2, Button3, Button4, Button5, Button6, Button7, Button8}
+public enum ButtonNum {Button0 = 0, Button1, Button2, Button3, Button4, Button5, Button6, Button7, Button8, Button9}
 public class PlayerController : MonoBehaviour 
 {
 
@@ -10,11 +10,12 @@ public class PlayerController : MonoBehaviour
 	public float rotateSpeed = 5;
 	public float jumpForce = 200;
 	public int currentPlayerNum = 1;
+	public int currentJoyNum = 1;
 	private bool grounded;
 
 	bool GetCurrentJoyButton(ButtonNum buttonNum)
 	{
-		return Input.GetButtonDown(string.Format("joy{0}_{1}", currentPlayerNum, buttonNum.ToString().ToLower()));
+		return Input.GetButtonDown(string.Format("joy{0}_{1}", currentJoyNum, buttonNum.ToString().ToLower()));
 	}
 
 	void OnCollisionEnter(Collision coll)
@@ -50,6 +51,6 @@ public class PlayerController : MonoBehaviour
 
 	void Rotating()
 	{
-		transform.Rotate(0, rotateSpeed * Input.GetAxis(string.Format("joy{0}_horizontal", currentPlayerNum)), 0);
+		transform.Rotate(0, rotateSpeed * Input.GetAxis(string.Format("joy{0}_horizontal", currentJoyNum)), 0);
 	}
 }
