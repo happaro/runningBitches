@@ -2,9 +2,9 @@
 using System.Collections;
 using UnityEngine.SceneManagement;
 
+public enum ButtonNum {Button0 = 0, Button1, Button2, Button3, Button4, Button5, Button6, Button7, Button8}
 public class PlayerController : MonoBehaviour 
 {
-	public enum ButtonNum {Button0, Button1, Button2, Button3, Button4, Button5, Button6, Button7, Button8}
 
 	public float speed = 10;
 	public float rotateSpeed = 5;
