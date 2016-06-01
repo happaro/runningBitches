@@ -59,14 +59,16 @@ public class PlayerController : MonoBehaviour
 			pickUper = true;
 			playerBehind.pickUped = true;
 			playerBehind.transform.position = this.transform.position;
-			playerBehind.transform.Translate(0, 1, 0);
+			playerBehind.transform.Translate(0, 1.5f, 0);
 			playerBehind.transform.parent = this.transform;
+			playerBehind.rigid.isKinematic = true;
 		}
 		else if (pickUper)
 		{
 			pickUper = false;
 			playerBehind.pickUped = false;
 			playerBehind.transform.parent = null;
+			playerBehind.rigid.isKinematic = false;
 		}
 	}
 
@@ -84,7 +86,7 @@ public class PlayerController : MonoBehaviour
 		if (InputManager.GetCurrentJoyButton(currentJoyNum, ButtonNum.Button6))
 			SceneManager.LoadScene(0);
 	}
-
+		
 	float h, v;
 	public float maxSpeed;
 	void Movement(bool grounded)
@@ -92,6 +94,10 @@ public class PlayerController : MonoBehaviour
 		if (fourDir)
 		{
 			rigid.AddForce(Mathf.Abs(rigid.velocity.x) < maxSpeed ? InputManager.GetCurrentJoyAxis(currentJoyNum, AxisType.Horizontal) * speed : 0, 0, Mathf.Abs(rigid.velocity.z) < maxSpeed ? InputManager.GetCurrentJoyAxis(currentJoyNum, AxisType.Vertical) * speed : 0);
+			if (Mathf.Abs(InputManager.GetCurrentJoyAxis(currentJoyNum, AxisType.Horizontal)) < 0.1f && grounded)
+				rigid.velocity = new Vector3(rigid.velocity.x / 1.3f, rigid.velocity.y, rigid.velocity.z);
+			if (Mathf.Abs(InputManager.GetCurrentJoyAxis(currentJoyNum, AxisType.Vertical)) < 0.1f && grounded)
+				rigid.velocity = new Vector3(rigid.velocity.x, rigid.velocity.y, rigid.velocity.z / 1.3f);
 		}
 		else
 		{
