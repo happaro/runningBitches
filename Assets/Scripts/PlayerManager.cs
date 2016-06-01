@@ -43,50 +43,40 @@ public class PlayerManager : MonoBehaviour
 			for (int i = 1; i <= 2; i++)
 			{
 				//X
-				if (GetCurrentJoyButton(ButtonNum.Button2, i))
+				if (InputManager.GetCurrentJoyButton(i, ButtonNum.Button2))
 					AddPlayer(i);
 				//START
-				if (GetCurrentJoyButton(ButtonNum.Button9, i))
+				if (InputManager.GetCurrentJoyButton(i, ButtonNum.Button9))
 					SceneManager.LoadScene("Gameplay");
 				//L1
-				if (GetCurrentJoyButton(ButtonNum.Button4, i))
+				if (InputManager.GetCurrentJoyButton(i, ButtonNum.Button4))
 					ChangeColor(i, -1);
 				//R1
-				if (GetCurrentJoyButton(ButtonNum.Button5, i))
+				if (InputManager.GetCurrentJoyButton(i, ButtonNum.Button5))
 					ChangeColor(i, 1);
 				//L2
 				//if (GetCurrentJoyButton(ButtonNum.Button6, i))
 				//	ChangeSkin(i, 1);
 
-				if (!axisLock[i - 1] && GetCurrentJoyAxis("horizontal", i) != 0)
+				if (!axisLock[i - 1] && InputManager.GetCurrentJoyAxis(i, AxisType.Horizontal) != 0)
 				{
-					ChangeSkin(i, GetCurrentJoyAxis("horizontal", i));
+					ChangeSkin(i, (int) InputManager.GetCurrentJoyAxis(i, AxisType.Horizontal));
 					axisLock[i - 1] = true;
 				}
-				ResetAxisLock("horizontal", i);
+				ResetAxisLock(AxisType.Horizontal, i);
 			}
 		}
 		else
 		{
 			for (int i = 1; i <= 2; i++)
-				if (GetCurrentJoyButton(ButtonNum.Button9, i))
+				if (InputManager.GetCurrentJoyButton(i, ButtonNum.Button9))
 					SceneManager.LoadScene(0);
 		}
 	}
-
-	private bool GetCurrentJoyButton(ButtonNum buttonNum, int joystickNum)
+		
+	private void ResetAxisLock(AxisType axisType, int joystickNum)
 	{
-		return Input.GetButtonDown(string.Format("joy{0}_{1}", joystickNum, buttonNum.ToString().ToLower()));
-	}
-
-	private int GetCurrentJoyAxis(string axisName, int joystickNum)
-	{
-		return Mathf.RoundToInt(Input.GetAxis(string.Format("joy{0}_{1}", joystickNum, axisName)));
-	}
-
-	private void ResetAxisLock(string axisName, int joystickNum)
-	{
-		if (axisLock[joystickNum - 1] && Mathf.Abs(Input.GetAxis(string.Format("joy{0}_{1}", joystickNum, axisName))) < 0.1f)
+		if (axisLock[joystickNum - 1] && Mathf.Abs(InputManager.GetCurrentJoyAxis(joystickNum, axisType)) < 0.1f)
 			axisLock[joystickNum - 1] = false;
 	}
 

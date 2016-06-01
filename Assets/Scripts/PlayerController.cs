@@ -13,9 +13,15 @@ public class PlayerController : MonoBehaviour
 	public int currentJoyNum = 1;
 	private bool grounded;
 
-	bool GetCurrentJoyButton(ButtonNum buttonNum)
+	public bool fourDir;
+	public bool pickUped;
+	public bool pickUper;
+
+	public Rigidbody rigid;
+
+	void Start()
 	{
-		return Input.GetButtonDown(string.Format("joy{0}_{1}", currentJoyNum, buttonNum.ToString().ToLower()));
+		rigid = this.GetComponent<Rigidbody>();
 	}
 
 	void OnCollisionEnter(Collision coll)
@@ -27,22 +33,72 @@ public class PlayerController : MonoBehaviour
 	{
 		grounded = coll.gameObject.tag == "Ground" ? false : grounded;
 	}
-		
+
+	public PlayerController playerBehind;
+
+	void OnTriggerEnter(Collider coll)
+	{
+		if (coll.tag == "Player" && !pickUper)
+		{
+			playerBehind = coll.GetComponent<PlayerController>();
+		}
+	}
+
+	void OnTriggerExit(Collider coll)
+	{
+		if (coll.tag == "Player" && !pickUper)
+		{
+			playerBehind = null;
+		}
+	}
+
+	void TryPickUp()
+	{
+		if (playerBehind && !pickUper)
+		{
+			pickUper = true;
+			playerBehind.pickUped = true;
+			playerBehind.transform.position = this.transform.position;
+			playerBehind.transform.Translate(0, 1, 0);
+			playerBehind.transform.parent = this.transform;
+		}
+		else if (pickUper)
+		{
+			pickUper = false;
+			playerBehind.pickUped = false;
+			playerBehind.transform.parent = null;
+		}
+	}
+
 	void Update()
 	{	
-		Movement(grounded);
+		if (!pickUped)
+		{
+			Movement(grounded);
+			if (InputManager.GetCurrentJoyButton(currentJoyNum, ButtonNum.Button2) && grounded)
+				Jump();
+			if (InputManager.GetCurrentJoyButton(currentJoyNum, ButtonNum.Button3))
+				TryPickUp();
+		}
 		Rotating();
-		if (GetCurrentJoyButton(ButtonNum.Button2) && grounded)
-			Jump();
-		if (GetCurrentJoyButton(ButtonNum.Button6))
+		if (InputManager.GetCurrentJoyButton(currentJoyNum, ButtonNum.Button6))
 			SceneManager.LoadScene(0);
 	}
 
+	float h, v;
+	public float maxSpeed;
 	void Movement(bool grounded)
 	{
-		Vector3 movement = this.transform.rotation * Vector3.forward;
-		var v = movement / (100f / (grounded ? speed : speed / 2));
-		transform.GetComponent<Rigidbody>().MovePosition(this.transform.position + v);
+		if (fourDir)
+		{
+			rigid.AddForce(Mathf.Abs(rigid.velocity.x) < maxSpeed ? InputManager.GetCurrentJoyAxis(currentJoyNum, AxisType.Horizontal) * speed : 0, 0, Mathf.Abs(rigid.velocity.z) < maxSpeed ? InputManager.GetCurrentJoyAxis(currentJoyNum, AxisType.Vertical) * speed : 0);
+		}
+		else
+		{
+			Vector3 movement = this.transform.rotation * Vector3.forward;
+			var v = movement / (100f / (grounded ? speed : speed / 2));
+			transform.GetComponent<Rigidbody>().MovePosition(this.transform.position + v);
+		}
 	}
 	void Jump()
 	{
@@ -51,6 +107,17 @@ public class PlayerController : MonoBehaviour
 
 	void Rotating()
 	{
-		transform.Rotate(0, rotateSpeed * Input.GetAxis(string.Format("joy{0}_horizontal", currentJoyNum)), 0);
+		if (fourDir)
+		{
+			if (!(Mathf.Abs(InputManager.GetCurrentJoyAxis(currentJoyNum, AxisType.Vertical)) < 0.1f && Mathf.Abs(InputManager.GetCurrentJoyAxis(currentJoyNum, AxisType.Horizontal)) < 0.1f ))
+			{
+				h = InputManager.GetCurrentJoyAxis(currentJoyNum, AxisType.Horizontal);
+				v = InputManager.GetCurrentJoyAxis(currentJoyNum, AxisType.Vertical);
+			}
+			var targetObjPos = new Vector3(this.transform.position.x + h, this.transform.position.y, this.transform.position.z + v);
+			var targetRotation = Quaternion.LookRotation(targetObjPos - transform.position);
+			transform.rotation = Quaternion.Slerp(transform.rotation, targetRotation, 5 * Time.deltaTime);
+		}
+		else transform.Rotate(0, rotateSpeed * InputManager.GetCurrentJoyAxis(currentJoyNum, AxisType.Horizontal), 0);
 	}
 }
